@@ -16,12 +16,17 @@
     #define kCFCoreFoundationVersionNumber_iOS_8_0 1129.15
 #endif
 
+
+// 定义主线程断言
 #define MBMainThreadAssert() NSAssert([NSThread isMainThread], @"MBProgressHUD needs to be accessed on the main thread.");
 
 CGFloat const MBProgressMaxOffset = 1000000.f;
 
+// 默认填充
 static const CGFloat MBDefaultPadding = 4.f;
+// 默认 label 字体大小
 static const CGFloat MBDefaultLabelFontSize = 16.f;
+// 默认 detail 字体大小
 static const CGFloat MBDefaultDetailsLabelFontSize = 12.f;
 
 
@@ -31,9 +36,13 @@ static const CGFloat MBDefaultDetailsLabelFontSize = 12.f;
     CGFloat _opacity;
 }
 
+// 是否使用动画
 @property (nonatomic, assign) BOOL useAnimation;
+// 已经完成
 @property (nonatomic, assign, getter=hasFinished) BOOL finished;
+// 指示器
 @property (nonatomic, strong) UIView *indicator;
+// 开始显示的时间
 @property (nonatomic, strong) NSDate *showStarted;
 @property (nonatomic, strong) NSArray *paddingConstraints;
 @property (nonatomic, strong) NSArray *bezelConstraints;
@@ -59,14 +68,24 @@ static const CGFloat MBDefaultDetailsLabelFontSize = 12.f;
 #pragma mark - Class methods
 
 + (instancetype)showHUDAddedTo:(UIView *)view animated:(BOOL)animated {
+    
+    // 创建 hud
     MBProgressHUD *hud = [[self alloc] initWithView:view];
+    
+    //  是否在 hud 隐藏的时候从父视图中移除
     hud.removeFromSuperViewOnHide = YES;
+    
+    // 将 hud 添加到 view 中
     [view addSubview:hud];
+    
+    // hud 以动画的方式显示
     [hud showAnimated:animated];
     return hud;
 }
 
 + (BOOL)hideHUDForView:(UIView *)view animated:(BOOL)animated {
+    
+    // 获取 view 中的 hud 视图
     MBProgressHUD *hud = [self HUDForView:view];
     if (hud != nil) {
         hud.removeFromSuperViewOnHide = YES;
@@ -76,6 +95,8 @@ static const CGFloat MBDefaultDetailsLabelFontSize = 12.f;
     return NO;
 }
 
+
+// 获取 hud 视图
 + (MBProgressHUD *)HUDForView:(UIView *)view {
     NSEnumerator *subviewsEnum = [view.subviews reverseObjectEnumerator];
     for (UIView *subview in subviewsEnum) {
@@ -90,17 +111,24 @@ static const CGFloat MBDefaultDetailsLabelFontSize = 12.f;
 }
 
 #pragma mark - Lifecycle
-
+// 通用实例化（默认实例化）
 - (void)commonInit {
     // Set default values for properties
+    // 动画类型
     _animationType = MBProgressHUDAnimationFade;
+    // hud 模式
     _mode = MBProgressHUDModeIndeterminate;
+    // 间隙
     _margin = 20.0f;
+    // 不透明度
     _opacity = 1.f;
+    // 默认启用运动
     _defaultMotionEffectsEnabled = YES;
 
     // Default color, depending on the current iOS version
-    BOOL isLegacy = kCFCoreFoundationVersionNumber < kCFCoreFoundationVersionNumber_iOS_7_0;
+    // 默认的颜色依赖于当前系统版本
+    BOOL isLegacy = kCFCoreFoundationVersionNumber < kCFCoreFoundationVersionNumber_iOS_7_0; //  当前版本小于 iOS7
+
     _contentColor = isLegacy ? [UIColor whiteColor] : [UIColor colorWithWhite:0.f alpha:0.7f];
     // Transparent background
     self.opaque = NO;
@@ -130,6 +158,8 @@ static const CGFloat MBDefaultDetailsLabelFontSize = 12.f;
 }
 
 - (id)initWithView:(UIView *)view {
+    
+    // 断言判断 view 不能为空
     NSAssert(view, @"View must not be nil.");
     return [self initWithFrame:view.bounds];
 }
@@ -141,13 +171,20 @@ static const CGFloat MBDefaultDetailsLabelFontSize = 12.f;
 #pragma mark - Show & hide
 
 - (void)showAnimated:(BOOL)animated {
+    // 判断是否在主线程
     MBMainThreadAssert();
+    
+    // 定时器失效
     [self.minShowTimer invalidate];
     self.useAnimation = animated;
     self.finished = NO;
     // If the grace time is set, postpone the HUD display
+    // 宽限时间大于 0， hud 就会延迟显示
     if (self.graceTime > 0.0) {
+        
+        // 创建定时器
         NSTimer *timer = [NSTimer timerWithTimeInterval:self.graceTime target:self selector:@selector(handleGraceTimer:) userInfo:nil repeats:NO];
+        // 将定时器添加到运行循环
         [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
         self.graceTimer = timer;
     } 
@@ -210,12 +247,17 @@ static const CGFloat MBDefaultDetailsLabelFontSize = 12.f;
 
 - (void)showUsingAnimation:(BOOL)animated {
     // Cancel any previous animations
+    // 边框视图图层移除所有的动画
     [self.bezelView.layer removeAllAnimations];
+    
+    // 背景视图图层 移除所有的动画
     [self.backgroundView.layer removeAllAnimations];
 
     // Cancel any scheduled hideDelayed: calls
+    // 延迟隐藏定时器
     [self.hideDelayTimer invalidate];
 
+    // 记录开始显示的时间
     self.showStarted = [NSDate date];
     self.alpha = 1.f;
 
@@ -312,10 +354,11 @@ static const CGFloat MBDefaultDetailsLabelFontSize = 12.f;
 }
 
 #pragma mark - UI
-
+// 设置视图
 - (void)setupViews {
     UIColor *defaultColor = self.contentColor;
 
+    // 背景视图
     MBBackgroundView *backgroundView = [[MBBackgroundView alloc] initWithFrame:self.bounds];
     backgroundView.style = MBProgressHUDBackgroundStyleSolidColor;
     backgroundView.backgroundColor = [UIColor clearColor];
@@ -324,6 +367,7 @@ static const CGFloat MBDefaultDetailsLabelFontSize = 12.f;
     [self addSubview:backgroundView];
     _backgroundView = backgroundView;
 
+    // 边框视图    
     MBBackgroundView *bezelView = [MBBackgroundView new];
     bezelView.translatesAutoresizingMaskIntoConstraints = NO;
     bezelView.layer.cornerRadius = 5.f;
@@ -379,49 +423,71 @@ static const CGFloat MBDefaultDetailsLabelFontSize = 12.f;
 
 - (void)updateIndicators {
     UIView *indicator = self.indicator;
+    
+    // 是否是活动指示器
     BOOL isActivityIndicator = [indicator isKindOfClass:[UIActivityIndicatorView class]];
+    // 是否是环形指示器
     BOOL isRoundIndicator = [indicator isKindOfClass:[MBRoundProgressView class]];
 
+    // 获取当前 hud 模式    
     MBProgressHUDMode mode = self.mode;
+    
+    // 活动指示器
     if (mode == MBProgressHUDModeIndeterminate) {
         if (!isActivityIndicator) {
             // Update to indeterminate indicator
+            // 移除之前的指示器
             [indicator removeFromSuperview];
+            
+            // 创建指示器            
             indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
             [(UIActivityIndicatorView *)indicator startAnimating];
+            
+            // 将指示器添加到边框视图
             [self.bezelView addSubview:indicator];
         }
     }
+    // 水平进度条
     else if (mode == MBProgressHUDModeDeterminateHorizontalBar) {
         // Update to bar determinate indicator
         [indicator removeFromSuperview];
+        // 创建进度条        
         indicator = [[MBBarProgressView alloc] init];
         [self.bezelView addSubview:indicator];
     }
+    // 一个圆，饼形的进度视图。
     else if (mode == MBProgressHUDModeDeterminate || mode == MBProgressHUDModeAnnularDeterminate) {
         if (!isRoundIndicator) {
             // Update to determinante indicator
             [indicator removeFromSuperview];
+            
+            // 圆的指示器
             indicator = [[MBRoundProgressView alloc] init];
             [self.bezelView addSubview:indicator];
         }
         if (mode == MBProgressHUDModeAnnularDeterminate) {
             [(MBRoundProgressView *)indicator setAnnular:YES];
         }
-    } 
+    }
+    // 自定义视图
     else if (mode == MBProgressHUDModeCustomView && self.customView != indicator) {
         // Update custom view indicator
         [indicator removeFromSuperview];
         indicator = self.customView;
         [self.bezelView addSubview:indicator];
     }
+    
+    // 单纯文字
     else if (mode == MBProgressHUDModeText) {
         [indicator removeFromSuperview];
         indicator = nil;
     }
+    
+    //
     indicator.translatesAutoresizingMaskIntoConstraints = NO;
     self.indicator = indicator;
 
+    // kvc
     if ([indicator respondsToSelector:@selector(setProgress:)]) {
         [(id)indicator setValue:@(self.progress) forKey:@"progress"];
     }
@@ -659,8 +725,13 @@ static const CGFloat MBDefaultDetailsLabelFontSize = 12.f;
 }
 
 - (void)setCustomView:(UIView *)customView {
+    // 当前视图和上一次视图不一样的时候才记录
     if (customView != _customView) {
+        
+        // 记录视图
         _customView = customView;
+        
+        // 当模式为自定义视图的时候就更新视图
         if (self.mode == MBProgressHUDModeCustomView) {
             [self updateIndicators];
         }

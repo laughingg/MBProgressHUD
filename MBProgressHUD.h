@@ -36,21 +36,31 @@
 
 extern CGFloat const MBProgressMaxOffset;
 
+
+// HUD 模式
 typedef NS_ENUM(NSInteger, MBProgressHUDMode) {
     /// UIActivityIndicatorView.
+    /// 活动指示器
     MBProgressHUDModeIndeterminate,
     /// A round, pie-chart like, progress view.
+    /// 一个圆，饼形的进度视图。
     MBProgressHUDModeDeterminate,
     /// Horizontal progress bar.
+    /// 水平进度条
     MBProgressHUDModeDeterminateHorizontalBar,
     /// Ring-shaped progress view.
+    /// 环形进度视图
     MBProgressHUDModeAnnularDeterminate,
     /// Shows a custom view.
+    /// 显示一个自定义视图
     MBProgressHUDModeCustomView,
     /// Shows only labels.
+    /// 只显示文字
     MBProgressHUDModeText
 };
 
+
+// HUD 动画
 typedef NS_ENUM(NSInteger, MBProgressHUDAnimation) {
     /// Opacity animation
     MBProgressHUDAnimationFade,
@@ -62,6 +72,8 @@ typedef NS_ENUM(NSInteger, MBProgressHUDAnimation) {
     MBProgressHUDAnimationZoomIn
 };
 
+
+// hud 背景样式
 typedef NS_ENUM(NSInteger, MBProgressHUDBackgroundStyle) {
     /// Solid color background
     MBProgressHUDBackgroundStyleSolidColor,
@@ -189,6 +201,8 @@ NS_ASSUME_NONNULL_BEGIN
  * not be shown at all.
  * This may be used to prevent HUD display for very short tasks.
  * Defaults to 0 (no grace time).
+ * 
+ * 宽限期是以秒为单位的时间，
  */
 @property (assign, nonatomic) NSTimeInterval graceTime;
 
@@ -203,6 +217,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Removes the HUD from its parent view when hidden.
  * Defaults to NO.
  */
+// 当 hud 隐藏的时候，从父视图中移除
 @property (assign, nonatomic) BOOL removeFromSuperViewOnHide;
 
 /// @name Appearance
@@ -273,6 +288,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * The view containing the labels and indicator (or customView).
  */
+//  边框视图
 @property (strong, nonatomic, readonly) MBBackgroundView *bezelView;
 
 /**
@@ -317,6 +333,16 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 
+
+
+
+
+
+
+
+
+
+
 /**
  * A progress view for showing definite progress by filling up a circle (pie chart).
  */
@@ -346,6 +372,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, getter = isAnnular) BOOL annular;
 
 @end
+
+
+
+
+
+
 
 
 /**
@@ -379,6 +411,19 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 @interface MBBackgroundView : UIView
 
 /**
@@ -395,6 +440,25 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) UIColor *color;
 
 @end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @interface MBProgressHUD (Deprecated)
 

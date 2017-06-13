@@ -208,7 +208,16 @@
     hud.mode = MBProgressHUDModeCustomView;
     // Set an image view with a checkmark.
     UIImage *image = [[UIImage imageNamed:@"Checkmark"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-    hud.customView = [[UIImageView alloc] initWithImage:image];
+    
+    UIView *cusView = [[UIView alloc] init];
+    cusView.frame = CGRectMake(0, 0, 30, 30);
+    cusView.backgroundColor = [UIColor redColor];
+    
+    
+    hud.customView = cusView;
+    
+    
+//    hud.customView = [[UIImageView alloc] initWithImage:image];
     // Looks a bit nicer if we make it square.
     hud.square = YES;
     // Optional label text.
